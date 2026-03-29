@@ -1,7 +1,8 @@
-export async function fetchListings({ minPrice, maxPrice, amenities, drawnArea }) {
+export async function fetchListings({ minPrice, maxPrice, minBedrooms, amenities, drawnArea }) {
   const params = new URLSearchParams({
     minPrice: minPrice || '',
     maxPrice: maxPrice || '',
+    minBedrooms: minBedrooms || 1,
     amenities: amenities?.join(',') || '',
   });
 

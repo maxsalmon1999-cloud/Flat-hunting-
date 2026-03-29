@@ -3,13 +3,13 @@
 
 const LONDON_REGION = 'REGION%5E87490'; // London region identifier
 
-export async function scrapeRightmove({ minPrice = 600, maxPrice = 2500 } = {}) {
+export async function scrapeRightmove({ minPrice = 600, maxPrice = 2500, minBedrooms = 1 } = {}) {
   const url =
     `https://www.rightmove.co.uk/property-to-rent/find.html` +
     `?locationIdentifier=${LONDON_REGION}` +
     `&minPrice=${minPrice}` +
     `&maxPrice=${maxPrice}` +
-    `&minBedrooms=1` +
+    `&minBedrooms=${minBedrooms}` +
     `&propertyTypes=flat` +
     `&includeLetAgreed=false` +
     `&sortType=6`; // most recent

@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 
-export async function scrapeSpareRoom({ minPrice = 600, maxPrice = 2500 } = {}) {
+export async function scrapeSpareRoom({ minPrice = 600, maxPrice = 2500, minBedrooms = 1 } = {}) {
   const searchUrl = new URL('https://www.spareroom.co.uk/flatshare/london');
   searchUrl.searchParams.set('min_price', String(minPrice));
   searchUrl.searchParams.set('max_price', String(maxPrice));
@@ -9,6 +9,7 @@ export async function scrapeSpareRoom({ minPrice = 600, maxPrice = 2500 } = {}) 
   searchUrl.searchParams.set('max_per_page', '20');
   searchUrl.searchParams.set('sort_by', 'last_updated');
   searchUrl.searchParams.set('rooms_for', '1');
+  if (minBedrooms > 1) searchUrl.searchParams.set('min_beds', String(minBedrooms));
 
   const browser = await puppeteer.launch({
     headless: 'new',

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import DrawingMap from '../components/DrawingMap.jsx';
 
 const AMENITY_OPTIONS = [
@@ -22,6 +21,12 @@ export default function SearchAreaTab({
   setCriteria,
   onSearch,
 }) {
+  const hasArea = Boolean(drawnArea);
+  const priceRangeInvalid = criteria.maxPrice > 0 && criteria.minPrice > criteria.maxPrice;
+  const selectedAmenitiesLabel = criteria.amenities.length === 0
+    ? 'No must-have amenities selected'
+    : `${criteria.amenities.length} must-have amenit${criteria.amenities.length === 1 ? 'y' : 'ies'} selected`;
+
   const toggleAmenity = (id) => {
     setCriteria((prev) => ({
       ...prev,
@@ -32,8 +37,7 @@ export default function SearchAreaTab({
   };
 
   const handleSearch = () => {
-    if (!drawnArea) {
-      alert('Please draw a search zone on the map first using the polygon tool (top right of the map).');
+    if (!hasArea || priceRangeInvalid) {
       return;
     }
     onSearch();
@@ -50,9 +54,9 @@ export default function SearchAreaTab({
         {/* Drawing instructions */}
         <section className="section">
           <h2 className="section-title">Search Area</h2>
-          {!drawnArea ? (
+          {!hasArea ? (
             <div className="draw-instructions">
-              <p>Use the <strong>polygon tool</strong> in the top-right of the map to draw your search zone.</p>
+              <p>Click <strong>Start Area Selection</strong>, then click around the map to trace your search zone.</p>
               <p style={{ marginTop: 6 }}>
                 {isochrones.length > 0
                   ? 'The dashed coloured areas show your isochrones from Tab 1.'
@@ -65,7 +69,7 @@ export default function SearchAreaTab({
               <div>
                 <strong>Search zone drawn</strong>
                 <p style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
-                  Use the edit tools on the map to adjust or delete.
+                  Use Redraw Area or Clear on the map if you want to change it.
                 </p>
               </div>
             </div>
@@ -102,6 +106,26 @@ export default function SearchAreaTab({
               />
             </div>
           </div>
+          {priceRangeInvalid && (
+            <p className="error-text">Max rent must be greater than or equal to min rent.</p>
+          )}
+        </section>
+
+        {/* Bedrooms */}
+        <section className="section">
+          <h2 className="section-title">Bedrooms</h2>
+          <div className="bedroom-options">
+            {[1, 2, 3, 4].map((n) => (
+              <button
+                key={n}
+                className={`bedroom-btn${criteria.minBedrooms === n ? ' bedroom-btn--active' : ''}`}
+                onClick={() => setCriteria((p) => ({ ...p, minBedrooms: n }))}
+              >
+                {n === 4 ? '4+' : n}
+              </button>
+            ))}
+          </div>
+          <p className="hint-text" style={{ marginTop: 6 }}>Minimum number of bedrooms</p>
         </section>
 
         {/* Amenity checklist */}
@@ -127,16 +151,47 @@ export default function SearchAreaTab({
           </div>
         </section>
 
+        <section className="section">
+          <h2 className="section-title">Ready To Search</h2>
+          <div className="search-summary">
+            <div className={`search-summary__item${hasArea ? ' search-summary__item--done' : ''}`}>
+              <span className="search-summary__icon">{hasArea ? '✓' : '1'}</span>
+              <div>
+                <strong>{hasArea ? 'Area selected' : 'Draw a search area'}</strong>
+                <p>{hasArea ? 'Your polygon is saved on the map.' : 'Start area selection on the map, then click points around the boundary.'}</p>
+              </div>
+            </div>
+            <div className={`search-summary__item${!priceRangeInvalid ? ' search-summary__item--done' : ''}`}>
+              <span className="search-summary__icon">{priceRangeInvalid ? '2' : '✓'}</span>
+              <div>
+                <strong>{priceRangeInvalid ? 'Fix the rent range' : 'Filters look good'}</strong>
+                <p>
+                  £{criteria.minPrice || 0} to £{criteria.maxPrice || 0} · {criteria.minBedrooms === 4 ? '4+' : criteria.minBedrooms} bed minimum
+                </p>
+              </div>
+            </div>
+            <div className="search-summary__item search-summary__item--muted">
+              <span className="search-summary__icon">i</span>
+              <div>
+                <strong>Amenities</strong>
+                <p>{selectedAmenitiesLabel}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Search button */}
         <section className="section section--no-border">
           <button
             className="btn btn-primary btn-block"
             onClick={handleSearch}
+            disabled={!hasArea || priceRangeInvalid}
           >
-            🏠 Find Flats
+            🏠 Find Flats In This Area
           </button>
-          {!drawnArea && (
-            <p className="hint-text">Draw a search zone on the map first.</p>
+          {!hasArea && <p className="hint-text">Draw a search zone on the map first.</p>}
+          {hasArea && !priceRangeInvalid && (
+            <p className="hint-text">This will switch to Listings and start the search immediately.</p>
           )}
         </section>
       </aside>

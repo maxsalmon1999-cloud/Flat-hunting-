@@ -9,6 +9,7 @@ export default function ListingsTab({
   setListings,
   savedListings,
   setSavedListings,
+  searchNonce,
 }) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,12 @@ export default function ListingsTab({
   }, [loadSaved]);
 
   const runSearch = useCallback(async () => {
+    if (!drawnArea) {
+      setErrors({ general: 'Draw a search zone in the Search Zone tab before searching.' });
+      setHasFetched(false);
+      return;
+    }
+
     setLoading(true);
     setErrors(null);
     setCurrentIdx(0);
@@ -36,6 +43,7 @@ export default function ListingsTab({
       const result = await fetchListings({
         minPrice: criteria.minPrice,
         maxPrice: criteria.maxPrice,
+        minBedrooms: criteria.minBedrooms,
         amenities: criteria.amenities,
         drawnArea,
       });
@@ -49,6 +57,12 @@ export default function ListingsTab({
       setLoading(false);
     }
   }, [criteria, drawnArea, setListings]);
+
+  useEffect(() => {
+    if (searchNonce > 0) {
+      runSearch();
+    }
+  }, [searchNonce, runSearch]);
 
   const handleLike = async (listing) => {
     try {
@@ -138,7 +152,7 @@ export default function ListingsTab({
                 className="btn btn-primary"
                 style={{ marginTop: 16 }}
                 onClick={runSearch}
-                disabled={loading}
+                disabled={loading || !drawnArea}
               >
                 🔍 Search Now
               </button>

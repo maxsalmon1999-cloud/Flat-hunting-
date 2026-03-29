@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import IsochroneTab from './tabs/IsochroneTab.jsx';
 import SearchAreaTab from './tabs/SearchAreaTab.jsx';
 import ListingsTab from './tabs/ListingsTab.jsx';
@@ -30,13 +30,17 @@ export default function App() {
 
   // ── Tab 2: search criteria ────────────────────────────────────────────────
   const [drawnArea, setDrawnArea] = useState(null);
-  const [criteria, setCriteria] = useState({ minPrice: 800, maxPrice: 1800, amenities: [] });
+  const [criteria, setCriteria] = useState({ minPrice: 800, maxPrice: 1800, minBedrooms: 1, amenities: [] });
 
   // ── Tab 3: listings ───────────────────────────────────────────────────────
   const [listings, setListings] = useState([]);
   const [savedListings, setSavedListings] = useState([]);
+  const [searchNonce, setSearchNonce] = useState(0);
 
-  const switchToListings = () => setActiveTab(2);
+  const startListingsSearch = () => {
+    setSearchNonce((prev) => prev + 1);
+    setActiveTab(2);
+  };
 
   return (
     <div className="app">
@@ -80,7 +84,7 @@ export default function App() {
             setDrawnArea={setDrawnArea}
             criteria={criteria}
             setCriteria={setCriteria}
-            onSearch={switchToListings}
+            onSearch={startListingsSearch}
           />
         )}
 
@@ -92,6 +96,7 @@ export default function App() {
             setListings={setListings}
             savedListings={savedListings}
             setSavedListings={setSavedListings}
+            searchNonce={searchNonce}
           />
         )}
       </div>

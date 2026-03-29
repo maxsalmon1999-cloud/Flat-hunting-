@@ -78,13 +78,14 @@ app.post('/api/isochrone', async (req, res) => {
 
 // ─── Listings scraper ─────────────────────────────────────────────────────────
 app.post('/api/listings', async (req, res) => {
-  const { minPrice, maxPrice, amenities } = req.query;
+  const { minPrice, maxPrice, minBedrooms, amenities } = req.query;
   const { drawnArea } = req.body;
   const amenityList = amenities ? amenities.split(',').filter(Boolean) : [];
 
+  const beds = parseInt(minBedrooms, 10) || 1;
   const [srResult, rmResult] = await Promise.allSettled([
-    scrapeSpareRoom({ minPrice: minPrice || 600, maxPrice: maxPrice || 2500 }),
-    scrapeRightmove({ minPrice: minPrice || 600, maxPrice: maxPrice || 2500 }),
+    scrapeSpareRoom({ minPrice: minPrice || 600, maxPrice: maxPrice || 2500, minBedrooms: beds }),
+    scrapeRightmove({ minPrice: minPrice || 600, maxPrice: maxPrice || 2500, minBedrooms: beds }),
   ]);
 
   let listings = [
@@ -96,7 +97,7 @@ app.post('/api/listings', async (req, res) => {
   if (drawnArea?.geometry?.coordinates?.length) {
     const ring = drawnArea.geometry.coordinates[0]; // [[lng, lat], ...]
     listings = listings.filter((l) => {
-      if (!l.latlng) return true; // include if no coords available
+      if (!l.latlng) return false; // exclude if we can't verify location
       return pointInPolygon([l.latlng.lng, l.latlng.lat], ring);
     });
   }
